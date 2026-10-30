@@ -1,0 +1,26 @@
+<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="robots" content="noindex,nofollow"><meta name="viewport" content="width=device-width,initial-scale=1"><title>نل — إدارة الفنيات</title><link rel="stylesheet" href="style.css"></head><body>
+<div id="login"><form onsubmit="return login(event)"><h2>نل — إدارة الفنيات</h2><input id="lu" placeholder="اسم المستخدم" autocomplete="username"><input id="lp" type="password" placeholder="كلمة المرور" autocomplete="current-password"><div id="le" hidden>اسم المستخدم أو كلمة المرور غير صحيحة</div><button class="b p">دخول</button></form></div>
+<header><b>نل · إدارة الفنيات</b><nav id="tabs"><button data-t="staff" class="on adm">الفنيات</button><button data-t="att">الحضور</button><button data-t="pay" class="adm">المرتبات</button><button data-t="rep" class="adm">التقرير</button></nav><span><button class="b" onclick="load()" title="تحديث">🔄</button><button class="b" onclick="logout()">خروج</button></span></header>
+<main>
+<section id="t-staff" class="on"><div class="bar"><h2>الفنيات</h2><button class="b p" onclick="openStaff()">+ إضافة فنية</button></div>
+<div class="card"><table><thead><tr><th>الاسم</th><th>التخصص</th><th>تاريخ التعيين</th><th>أيام العمل</th><th>الشيفت</th><th>المرتب</th><th>عمولة</th><th></th></tr></thead><tbody id="s-body"></tbody></table></div></section>
+<section id="t-att"><div class="bar"><h2>الحضور والانصراف</h2><button class="b adm" onclick="aGo(-1)">◀</button><input type="date" id="a-date" onchange="rAtt()"><button class="b adm" onclick="aGo(1)">▶</button><label class="mut"><input type="checkbox" id="a-all" onchange="rAtt()"> إظهار الكل</label><button class="b p adm" onclick="fillAll()">الكل حاضرات بالموعد المعتاد</button></div>
+<div class="card"><table><thead><tr><th>الاسم</th><th>الشيفت</th><th>الحالة</th><th>الحضور</th><th>الانصراف</th><th></th><th>تسجيل سريع</th></tr></thead><tbody id="a-body"></tbody></table></div></section>
+<section id="t-pay"><div class="bar"><h2>المرتبات</h2><input type="month" id="p-month" onchange="rPay()"></div>
+<div class="card"><table><thead><tr><th>الاسم</th><th>الأساسي</th><th>مبيعاتها</th><th>العمولة</th><th>غياب</th><th>تأخير / مبكر</th><th>بنود</th><th>الصافي</th><th></th></tr></thead><tbody id="p-body"></tbody><tfoot id="p-foot"></tfoot></table></div></section>
+<section id="t-rep"><div class="bar"><h2>تقرير الحضور</h2><input type="date" id="r-from" onchange="rRep()"><input type="date" id="r-to" onchange="rRep()"><button class="b" onclick="repMonth()">هذا الشهر</button></div>
+<div class="card"><table><thead><tr><th>الاسم</th><th>أيام الحضور</th><th>أيام الغياب</th><th>أيام الإجازة</th><th>ساعات العمل</th><th>التأخير</th><th>الخروج المبكر</th></tr></thead><tbody id="r-body"></tbody><tfoot id="r-foot"></tfoot></table></div></section>
+</main>
+<div class="md" id="m-staff"><div><h3 id="ms-t">فنية</h3><div class="f">
+<label>الاسم<input id="s-name"></label><label>التخصص<input id="s-spec"></label>
+<label>الموبايل<input id="s-mob"></label><label>تاريخ التعيين<input type="date" id="s-hire"></label>
+<label>آخر يوم عمل (اختياري)<input type="date" id="s-end"></label><label>المرتب الأساسي<input type="number" id="s-base" min="0"></label>
+<label>بداية الشيفت<input type="time" id="s-ss"></label><label>نهاية الشيفت<input type="time" id="s-se"></label>
+<label>نسبة العمولة %<input type="number" id="s-pct" min="0" step="0.5"></label><label>مربوطة بفنية الصالون (للعمولة)<select id="s-tech"></select></label>
+<label>نوع الدوام<select id="s-type"><option value="full">دوام كامل (شهري)</option><option value="part">دوام جزئي (بالأيام)</option></select></label>
+<label class="w">أيام العمل<span class="days" id="s-days"></span></label></div>
+<div class="act"><button class="b" onclick="cm('m-staff')">إلغاء</button><button class="b p" onclick="saveStaff()">حفظ</button></div></div></div>
+<div class="md" id="m-adj"><div><h3 id="ma-t">بنود</h3><div id="ma-list"></div><div class="f" style="margin-top:10px">
+<label>النوع<select id="ad-type"><option value="b">مكافأة (+)</option><option value="d">خصم / سلفة (−)</option></select></label><label>المبلغ<input type="number" id="ad-amt" min="0"></label>
+<label class="w">ملاحظة<input id="ad-note"></label></div><div class="act"><button class="b" onclick="cm('m-adj')">إغلاق</button><button class="b p" onclick="addAdj()">إضافة</button></div></div></div>
+<div id="toast"></div><script src="app.js"></script></body></html>
