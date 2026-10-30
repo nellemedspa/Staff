@@ -4,7 +4,7 @@
 <main>
 <section id="t-staff" class="on"><div class="bar"><h2>الفنيات</h2><button class="b p" onclick="openStaff()">+ إضافة فنية</button></div>
 <div class="card"><table><thead><tr><th>الاسم</th><th>التخصص</th><th>تاريخ التعيين</th><th>أيام العمل</th><th>الشيفت</th><th>المرتب</th><th>عمولة</th><th></th></tr></thead><tbody id="s-body"></tbody></table></div></section>
-<section id="t-att"><div class="bar"><h2>الحضور والانصراف</h2><button class="b adm" onclick="aGo(-1)">◀</button><input type="date" id="a-date" onchange="rAtt()"><button class="b adm" onclick="aGo(1)">▶</button><label class="mut"><input type="checkbox" id="a-all" onchange="rAtt()"> إظهار الكل</label><button class="b p adm" onclick="fillAll()">الكل حاضرات بالموعد المعتاد</button></div>
+<section id="t-att"><div class="bar"><h2>الحضور والانصراف</h2><span id="a-hours" class="mut"></span><button class="b adm" onclick="aGo(-1)">◀</button><input type="date" id="a-date" onchange="rAtt()"><button class="b adm" onclick="aGo(1)">▶</button><label class="mut"><input type="checkbox" id="a-all" onchange="rAtt()"> إظهار الكل</label><button class="b p adm" onclick="fillAll()">الكل حاضرات بالموعد المعتاد</button></div>
 <div class="card"><table><thead><tr><th>الاسم</th><th>الشيفت</th><th>الحالة</th><th>الحضور</th><th>الانصراف</th><th></th><th>تسجيل سريع</th></tr></thead><tbody id="a-body"></tbody></table></div></section>
 <section id="t-pay"><div class="bar"><h2>المرتبات</h2><input type="month" id="p-month" onchange="rPay()"></div>
 <div class="card"><table><thead><tr><th>الاسم</th><th>الأساسي</th><th>مبيعاتها</th><th>العمولة</th><th>غياب</th><th>تأخير / مبكر</th><th>بنود</th><th>الصافي</th><th></th></tr></thead><tbody id="p-body"></tbody><tfoot id="p-foot"></tfoot></table></div></section>
@@ -15,7 +15,7 @@
 <label>الاسم<input id="s-name"></label><label>التخصص<input id="s-spec"></label>
 <label>الموبايل<input id="s-mob"></label><label>تاريخ التعيين<input type="date" id="s-hire"></label>
 <label>آخر يوم عمل (اختياري)<input type="date" id="s-end"></label><label>المرتب الأساسي<input type="number" id="s-base" min="0"></label>
-<label>بداية الشيفت<input type="time" id="s-ss"></label><label>نهاية الشيفت<input type="time" id="s-se"></label>
+<label>بداية الشيفت (فاضي = مواعيد الصالون)<input type="time" id="s-ss"></label><label>نهاية الشيفت (فاضي = مواعيد الصالون)<input type="time" id="s-se"></label>
 <label>نسبة العمولة %<input type="number" id="s-pct" min="0" step="0.5"></label><label>مربوطة بفنية الصالون (للعمولة)<select id="s-tech"></select></label>
 <label>نوع الدوام<select id="s-type"><option value="full">دوام كامل (شهري)</option><option value="part">دوام جزئي (بالأيام)</option></select></label>
 <label class="w">أيام العمل<span class="days" id="s-days"></span></label></div>
