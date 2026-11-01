@@ -26,3 +26,31 @@ td{padding:9px 12px;font-size:13px;border-bottom:1px solid #f0ede8}tr:last-child
 #toast.on{opacity:1}#toast.bad{background:var(--err)}
 
 .limited .adm{display:none!important}.limited #t-att h2{font-size:17px}
+
+/* ===== Mobile ===== */
+@media (max-width:720px){
+ body{padding-bottom:76px}
+ header{height:auto;min-height:50px;padding:8px 12px;gap:8px}header nav{order:9;position:fixed;bottom:0;left:0;right:0;z-index:40;background:var(--dark);padding:6px 6px max(6px,env(safe-area-inset-bottom));gap:2px;border-top:1px solid rgba(255,255,255,.1)}
+ header nav button{flex:1;min-height:46px;padding:6px 2px;font-size:12px}header>b{flex:1}
+ .limited header nav{display:none}.limited body,body.limited{padding-bottom:16px}
+ main{padding:12px 10px}
+ .bar{gap:8px}.bar h2{flex:1 1 100%;font-size:16px}
+ .bar input[type=date],.bar input[type=month]{flex:1;min-width:130px}
+ input,select{font-size:16px;min-height:42px}.b{min-height:42px;padding:8px 14px}
+ .card{overflow:visible;background:none;border:0}
+ table,thead,tbody,tfoot,tr,td{display:block;min-width:0}thead{display:none}
+ tbody tr,tfoot tr{background:#fff;border:1px solid var(--border);border-radius:12px;margin-bottom:10px;padding:6px 14px}
+ td{display:flex;justify-content:space-between;align-items:center;gap:12px;border:0;padding:7px 0;text-align:left}
+ td::before{content:attr(data-l);color:var(--light);font-size:11px;font-weight:700;flex-shrink:0;text-align:right}
+ td[data-l=""]::before,td:first-child::before,.qk::before{display:none}
+ td:first-child{justify-content:flex-start;font-size:15px;padding-top:10px;border-bottom:1px solid #f0ede8;margin-bottom:4px}
+ td{flex-wrap:wrap}td>.mut{flex:1 1 100%;text-align:left;margin-top:-2px}
+ td input,td select{width:auto;flex:1;min-width:0;max-width:62%}
+ td .mut input{width:62px;max-width:none;flex:none}
+ .qk{flex-wrap:wrap;justify-content:stretch}.qk .b{flex:1 1 30%;min-height:46px}
+ tfoot tr{background:var(--rose-l)}tfoot td:first-child{border:0}
+ .md{align-items:flex-end}.md>div{width:100%;max-width:100%;border-radius:18px 18px 0 0;padding:18px 16px max(18px,env(safe-area-inset-bottom))}
+ .f{grid-template-columns:1fr}
+ .md .act{position:sticky;bottom:-18px;background:#fff;padding:12px 0 4px;margin-top:10px;border-top:1px solid var(--border)}.md .act .b{flex:1}
+ #toast{bottom:84px}.limited #toast{bottom:20px}
+}
