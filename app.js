@@ -22,12 +22,12 @@ async function del(t,id){try{const r=await fetch(`${SB}/rest/v1/${t}?id=eq.${id}
 async function load(){try{const lim=ROLE==='limited';const[a,b,c,d,e]=await Promise.all([get('nelle_hr_staff'),get('nelle_hr_att'),lim?[]:get('nelle_hr_adj'),lim?[]:get('nelle_invoices'),lim?[]:get('nelle_techs')]);Object.assign(S,{staff:a,att:b,adj:c,inv:d,techs:e});render()}catch(e){toast('⚠️ تعذر التحميل: '+e.message+' — تأكدي من تشغيل setup.sql',1)}}
 // ----- Login (simple screen-lock) -----
 function start(role){ROLE=role;document.body.classList.toggle('limited',role==='limited');$('login').classList.remove('on');if(role==='limited'){document.querySelector('[data-t="att"]').click();$('a-date').disabled=true}load()}
-function login(ev){ev.preventDefault();const user=$('lu').value.trim(),u=USERS[user];if(u&&$('lp').value===u.pass){localStorage.setItem('hr_auth',JSON.stringify({user,role:u.role}));start(u.role)}else{$('le').hidden=false;$('lp').value=''}return false}
+function login(ev){ev.preventDefault();const typed=$('lu').value.trim().toLowerCase(),user=Object.keys(USERS).find(k=>k.toLowerCase()===typed),u=USERS[user];if(u&&$('lp').value.trim()===u.pass){localStorage.setItem('hr_auth',JSON.stringify({user,role:u.role}));start(u.role)}else{$('le').hidden=false;$('lp').value=''}return false}
 function logout(){localStorage.removeItem('hr_auth');location.reload()}
 // ----- Tabs -----
 $('tabs').onclick=e=>{const t=e.target.dataset.t;if(!t)return;[...$('tabs').children].forEach(b=>b.classList.toggle('on',b===e.target));document.querySelectorAll('section').forEach(s=>s.classList.toggle('on',s.id==='t-'+t));render()};
 const cm=id=>$(id).classList.remove('on');
-function render(){if(ROLE==='limited')return rAtt();rStaff();rAtt();rPay();rRep()}
+function render(){if(ROLE==='limited'){rAtt();rRep();return}rStaff();rAtt();rPay();rRep()}
 // ----- Staff -----
 let editId=null;
 const techName=s=>S.techs.find(t=>t.id===s.techId)?.name||s.name;
@@ -103,3 +103,5 @@ try{const a=JSON.parse(localStorage.getItem('hr_auth')||'null');if(a&&USERS[a.us
 function labelRows(tb){const hs=[...tb.closest('table').querySelectorAll('thead th')].map(h=>h.textContent.trim());
  tb.querySelectorAll('tr').forEach(r=>{let ci=0;[...r.children].forEach(c=>{if(c.colSpan===1)c.dataset.l=hs[ci]||'';ci+=c.colSpan})})}
 document.querySelectorAll('tbody,tfoot').forEach(tb=>new MutationObserver(()=>labelRows(tb)).observe(tb,{childList:true}));
+
+if($('ver'))$('ver').textContent='نسخة 3';
