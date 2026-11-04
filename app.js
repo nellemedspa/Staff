@@ -21,11 +21,11 @@ async function up(t,rec){try{const r=await fetch(`${SB}/rest/v1/${t}`,{method:'P
 async function del(t,id){try{const r=await fetch(`${SB}/rest/v1/${t}?id=eq.${id}`,{method:'DELETE',headers:H});if(!r.ok)throw new Error(r.status);return true}catch(e){toast('⚠️ لم يتم الحذف: '+e.message,1);return false}}
 async function load(){try{const lim=ROLE==='limited';const[a,b,c,d,e]=await Promise.all([get('nelle_hr_staff'),get('nelle_hr_att'),lim?[]:get('nelle_hr_adj'),lim?[]:get('nelle_invoices'),lim?[]:get('nelle_techs')]);Object.assign(S,{staff:a,att:b,adj:c,inv:d,techs:e});render()}catch(e){toast('⚠️ تعذر التحميل: '+e.message+' — تأكدي من تشغيل setup.sql',1)}}
 // ----- Login (simple screen-lock) -----
-function start(role){ROLE=role;document.body.classList.toggle('limited',role==='limited');$('login').classList.remove('on');if(role==='limited'){document.querySelector('[data-t="att"]').click();$('a-date').disabled=true}load()}
+function start(role){ROLE=role;document.body.classList.toggle('limited',role==='limited');$('login').classList.remove('on');if(role==='limited'){document.querySelector('[data-t="att"]').click();$('a-date').max=tds(new Date())}load()}
 function login(ev){ev.preventDefault();const typed=$('lu').value.trim().toLowerCase(),user=Object.keys(USERS).find(k=>k.toLowerCase()===typed),u=USERS[user];if(u&&$('lp').value.trim()===u.pass){localStorage.setItem('hr_auth',JSON.stringify({user,role:u.role}));start(u.role)}else{$('le').hidden=false;$('lp').value=''}return false}
 function logout(){localStorage.removeItem('hr_auth');location.reload()}
 // ----- Tabs -----
-$('tabs').onclick=e=>{const t=e.target.dataset.t;if(!t)return;[...$('tabs').children].forEach(b=>b.classList.toggle('on',b===e.target));document.querySelectorAll('section').forEach(s=>s.classList.toggle('on',s.id==='t-'+t));render()};
+$('tabs').onclick=e=>{const t=e.target.dataset.t;if(!t)return;[...$('tabs').children].forEach(b=>b.classList.toggle('on',b===e.target));document.querySelectorAll('section').forEach(s=>s.classList.toggle('on',s.id==='t-'+t));if(t==='rep')repMonth();render()};
 const cm=id=>$(id).classList.remove('on');
 function render(){if(ROLE==='limited'){rAtt();rRep();return}rStaff();rAtt();rPay();rRep()}
 // ----- Staff -----
@@ -43,11 +43,11 @@ async function delStaff(id){const s=S.staff.find(x=>x.id===id);if(!confirm('حذ
 // ----- Attendance -----
 const emp=(s,d)=>(!s.hire||s.hire<=d)&&(!s.end||s.end>=d);
 const getA=(sid,d)=>S.att.find(a=>a.staffId===sid&&a.date===d);
-function aGo(n){const d=new Date($('a-date').value+'T00:00');d.setDate(d.getDate()+n);$('a-date').value=tds(d);rAtt()}
+function aGo(n){const d=new Date($('a-date').value+'T00:00');d.setDate(d.getDate()+n);if(ROLE==='limited'&&tds(d)>tds(new Date()))return;$('a-date').value=tds(d);rAtt()}
 function aNote(s,a){if(!a||!a.tin)return '';const sh=shiftFor(s,a.date);let t='';if(a.tout){const m=mins(a.tout)-mins(a.tin);if(m>0)t+=hm(m)+' س';}
  if(a.st==='p'&&sh.ss){const l=mins(a.tin)-mins(sh.ss);if(l>RULES.grace)t+=' · تأخير '+l+'د'}
  if(a.st==='p'&&a.tout&&sh.se){const e=mins(sh.se)-mins(a.tout);if(e>RULES.grace)t+=' · مبكر '+e+'د'}return t}
-function rAtt(){const lim=ROLE==='limited';if(lim||!$('a-date').value)$('a-date').value=tds(new Date());const d=$('a-date').value,today=d===tds(new Date()),wd=new Date(d+'T00:00').getDay(),all=$('a-all').checked;
+function rAtt(){const lim=ROLE==='limited',tdy=tds(new Date());if(!$('a-date').value||(lim&&$('a-date').value>tdy))$('a-date').value=tdy;const d=$('a-date').value,today=d===tds(new Date()),wd=new Date(d+'T00:00').getDay(),all=$('a-all').checked;
  const hrs=HOURS[wd];$('a-hours').textContent=hrs?'مواعيد الصالون: '+hrs[0]+' – '+hrs[1]:'الصالون مغلق اليوم';
  const rows=S.staff.filter(s=>emp(s,d)&&((!all&&hrs&&(s.days||[]).includes(wd))||(all)||getA(s.id,d)));
  $('a-body').innerHTML=rows.map(s=>{const a=getA(s.id,d)||{};const o=(v,t)=>`<option value="${v}"${a.st===v?' selected':''}>${t}</option>`;
@@ -86,7 +86,7 @@ function rPay(){if(!$('p-month').value)$('p-month').value=tds(new Date()).slice(
  $('p-foot').innerHTML=rows.length?`<tr><td colspan="7">إجمالي المرتبات</td><td class="net">${n(T)}</td><td></td></tr>`:''}
 async function setPct(id,v){const st=S.staff.find(x=>x.id===id),rec={...st,pct:Math.max(0,+v||0)};if(!await up('nelle_hr_staff',rec))return rPay();Object.assign(st,rec);rPay();toast('تم حفظ نسبة العمولة ✓')}
 function repMonth(){const t=new Date();$('r-from').value=tds(new Date(t.getFullYear(),t.getMonth(),1));$('r-to').value=tds(new Date(t.getFullYear(),t.getMonth()+1,0));rRep()}
-function rRep(){if(!$('r-from').value)return repMonth();const f=$('r-from').value,t=$('r-to').value,T={pres:0,abs:0,leave:0,work:0,late:0,early:0},z=m=>m?hm(m)+' س':'—';
+function rRep(){if(!$('r-from').value)return repMonth();const f=$('r-from').value,t=$('r-to').value,now=new Date();$('r-month').classList.toggle('p',f===tds(new Date(now.getFullYear(),now.getMonth(),1))&&t===tds(new Date(now.getFullYear(),now.getMonth()+1,0)));const T={pres:0,abs:0,leave:0,work:0,late:0,early:0},z=m=>m?hm(m)+' س':'—';
  $('r-body').innerHTML=S.staff.map(s=>{const x=stats(s,f,t);Object.keys(T).forEach(k=>T[k]+=x[k]);return `<tr><td><b>${esc(s.name)}</b></td><td>${x.pres}</td><td>${x.abs}</td><td>${x.leave}</td><td>${z(x.work)}</td><td>${z(x.late)}</td><td>${z(x.early)}</td></tr>`}).join('')||'<tr><td colspan="7" class="mut" style="text-align:center;padding:22px">لا توجد فنيات.</td></tr>';
  $('r-foot').innerHTML=S.staff.length?`<tr><td>الإجمالي</td><td>${T.pres}</td><td>${T.abs}</td><td>${T.leave}</td><td>${z(T.work)}</td><td>${z(T.late)}</td><td>${z(T.early)}</td></tr>`:''}
 let adjSid=null;

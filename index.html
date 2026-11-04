@@ -4,11 +4,11 @@
 <main>
 <section id="t-staff" class="on"><div class="bar"><h2>الفنيات</h2><button class="b p" onclick="openStaff()">+ إضافة فنية</button></div>
 <div class="card"><table><thead><tr><th>الاسم</th><th>التخصص</th><th>تاريخ التعيين</th><th>أيام العمل</th><th>الشيفت</th><th>المرتب</th><th>عمولة</th><th></th></tr></thead><tbody id="s-body"></tbody></table></div></section>
-<section id="t-att"><div class="bar"><h2>الحضور والانصراف</h2><span id="a-hours" class="mut"></span><button class="b adm" onclick="aGo(-1)">◀</button><input type="date" id="a-date" onchange="rAtt()"><button class="b adm" onclick="aGo(1)">▶</button><label class="mut"><input type="checkbox" id="a-all" onchange="rAtt()"> إظهار الكل</label><button class="b p adm" onclick="fillAll()">الكل حاضرات بالموعد المعتاد</button></div>
+<section id="t-att"><div class="bar"><h2>الحضور والانصراف</h2><span id="a-hours" class="mut"></span><button class="b" onclick="aGo(-1)">◀</button><input type="date" id="a-date" onchange="rAtt()"><button class="b" onclick="aGo(1)">▶</button><label class="mut"><input type="checkbox" id="a-all" onchange="rAtt()"> إظهار الكل</label><button class="b p adm" onclick="fillAll()">الكل حاضرات بالموعد المعتاد</button></div>
 <div class="card"><table><thead><tr><th>الاسم</th><th>الشيفت</th><th>الحالة</th><th>الحضور</th><th>الانصراف</th><th></th><th>تسجيل سريع</th></tr></thead><tbody id="a-body"></tbody></table></div></section>
 <section id="t-pay"><div class="bar"><h2>المرتبات</h2><input type="month" id="p-month" onchange="rPay()"></div>
 <div class="card"><table><thead><tr><th>الاسم</th><th>الأساسي</th><th>مبيعاتها</th><th>العمولة</th><th>غياب</th><th>تأخير / مبكر</th><th>بنود</th><th>الصافي</th><th></th></tr></thead><tbody id="p-body"></tbody><tfoot id="p-foot"></tfoot></table></div></section>
-<section id="t-rep"><div class="bar"><h2>تقرير الحضور</h2><input type="date" id="r-from" onchange="rRep()"><input type="date" id="r-to" onchange="rRep()"><button class="b" onclick="repMonth()">هذا الشهر</button></div>
+<section id="t-rep"><div class="bar"><h2>تقرير الحضور</h2><input type="date" id="r-from" onchange="rRep()"><input type="date" id="r-to" onchange="rRep()"><button class="b" id="r-month" onclick="repMonth()">هذا الشهر</button></div>
 <div class="card"><table><thead><tr><th>الاسم</th><th>أيام الحضور</th><th>أيام الغياب</th><th>أيام الإجازة</th><th>ساعات العمل</th><th>التأخير</th><th>الخروج المبكر</th></tr></thead><tbody id="r-body"></tbody><tfoot id="r-foot"></tfoot></table></div></section>
 </main>
 <div class="md" id="m-staff"><div><h3 id="ms-t">فنية</h3><div class="f">
