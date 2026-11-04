@@ -104,4 +104,8 @@ function labelRows(tb){const hs=[...tb.closest('table').querySelectorAll('thead 
  tb.querySelectorAll('tr').forEach(r=>{let ci=0;[...r.children].forEach(c=>{if(c.colSpan===1)c.dataset.l=hs[ci]||'';ci+=c.colSpan})})}
 document.querySelectorAll('tbody,tfoot').forEach(tb=>new MutationObserver(()=>labelRows(tb)).observe(tb,{childList:true}));
 
-if($('ver'))$('ver').textContent='نسخة 3';
+// ----- Version check: index.html and app.js must be uploaded together -----
+const VERSION='4';
+if($('ver'))$('ver').textContent='نسخة '+VERSION;
+if($('hv'))$('hv').textContent='v'+VERSION;
+if(document.body.dataset.v!==VERSION)toast('⚠️ index.html و app.js من نسختين مختلفتين — ارفعي كل الملفات معًا ثم حدّثي الصفحة',1);
