@@ -46,7 +46,7 @@ const getA=(sid,d)=>S.att.find(a=>a.staffId===sid&&a.date===d);
 function aGo(n){const d=new Date($('a-date').value+'T00:00');d.setDate(d.getDate()+n);if(ROLE==='limited'&&tds(d)>tds(new Date()))return;$('a-date').value=tds(d);rAtt()}
 function aNote(s,a){if(!a||!a.tin)return '';const sh=shiftFor(s,a.date);let t='';if(a.tout){const m=mins(a.tout)-mins(a.tin);if(m>0)t+=hm(m)+' س';}
  if(a.st==='p'&&sh.ss){const l=mins(a.tin)-mins(sh.ss);if(l>RULES.grace)t+=' · تأخير '+l+'د'}
- if(a.st==='p'&&a.tout&&sh.se){const e=mins(sh.se)-mins(a.tout);if(e>RULES.grace)t+=' · مبكر '+e+'د'}return t}
+ if(a.st==='p'&&a.tout&&sh.se){const e=mins(sh.se)-mins(a.tout);if(e>RULES.grace)t+=' · مبكر '+e+'د';const o=-e;if(o>RULES.grace)t+=' · إضافي '+o+'د'}return t}
 function rAtt(){const lim=ROLE==='limited',tdy=tds(new Date());if(!$('a-date').value||(lim&&$('a-date').value>tdy))$('a-date').value=tdy;const d=$('a-date').value,today=d===tds(new Date()),wd=new Date(d+'T00:00').getDay(),all=$('a-all').checked;
  const hrs=HOURS[wd];$('a-hours').textContent=hrs?'مواعيد الصالون: '+hrs[0]+' – '+hrs[1]:'الصالون مغلق اليوم';
  const rows=S.staff.filter(s=>emp(s,d)&&((!all&&hrs&&(s.days||[]).includes(wd))||(all)||getA(s.id,d)));
@@ -63,14 +63,14 @@ async function stamp(sid,k){const d=$('a-date').value,a=getA(sid,d)||{},t=new Da
 async function fillAll(){const d=$('a-date').value;for(const tr of document.querySelectorAll('#a-body tr[data-sid]')){const sid=tr.dataset.sid,s=S.staff.find(x=>x.id===sid);if(!getA(sid,d))await saveA(sid,{st:'p',tin:shiftFor(s,d).ss,tout:shiftFor(s,d).se})}rAtt();toast('تم التسجيل ✓')}
 // ----- Payroll -----
 const hm=m=>Math.floor(m/60)+':'+String(m%60).padStart(2,'0');
-function stats(s,from,to){let pres=0,abs=0,leave=0,work=0,late=0,early=0;
+function stats(s,from,to){let pres=0,abs=0,leave=0,work=0,late=0,early=0,over=0;
  S.att.filter(r=>r.staffId===s.id&&r.date>=from&&r.date<=to).forEach(r=>{
   if(r.st==='p'){pres++;if(r.tin&&r.tout){const m=mins(r.tout)-mins(r.tin);if(m>0)work+=m}
    const sh=shiftFor(s,r.date);
    if(r.tin&&sh.ss){const m=mins(r.tin)-mins(sh.ss);if(m>RULES.grace)late+=m}
-   if(r.tout&&sh.se){const m=mins(sh.se)-mins(r.tout);if(m>RULES.grace)early+=m}}
+   if(r.tout&&sh.se){const m=mins(sh.se)-mins(r.tout);if(m>RULES.grace)early+=m;const o=mins(r.tout)-mins(sh.se);if(o>RULES.grace)over+=o}}
   else if(r.st==='a')abs++;else if(r.st==='l')leave++});
- return{pres,abs,leave,work,late,early}}
+ return{pres,abs,leave,work,late,early,over}}
 function pay(s,ym){const dim=new Date(+ym.slice(0,4),+ym.slice(5),0).getDate(),ms=ym+'-01',me=ym+'-'+String(dim).padStart(2,'0');
  const f=s.hire&&s.hire>ms?s.hire:ms,t=s.end&&s.end<me?s.end:me,days=(s.days||[]);
  const sched=(a,b)=>{let n=0;for(let d=new Date(a+'T00:00'),e=new Date(b+'T00:00');d<=e;d.setDate(d.getDate()+1))if(days.includes(d.getDay()))n++;return n};
@@ -86,9 +86,8 @@ function rPay(){if(!$('p-month').value)$('p-month').value=tds(new Date()).slice(
  $('p-foot').innerHTML=rows.length?`<tr><td colspan="7">إجمالي المرتبات</td><td class="net">${n(T)}</td><td></td></tr>`:''}
 async function setPct(id,v){const st=S.staff.find(x=>x.id===id),rec={...st,pct:Math.max(0,+v||0)};if(!await up('nelle_hr_staff',rec))return rPay();Object.assign(st,rec);rPay();toast('تم حفظ نسبة العمولة ✓')}
 function repMonth(){const t=new Date();$('r-from').value=tds(new Date(t.getFullYear(),t.getMonth(),1));$('r-to').value=tds(new Date(t.getFullYear(),t.getMonth()+1,0));rRep()}
-function rRep(){if(!$('r-from').value)return repMonth();const f=$('r-from').value,t=$('r-to').value,now=new Date();$('r-month').classList.toggle('p',f===tds(new Date(now.getFullYear(),now.getMonth(),1))&&t===tds(new Date(now.getFullYear(),now.getMonth()+1,0)));const T={pres:0,abs:0,leave:0,work:0,late:0,early:0},z=m=>m?hm(m)+' س':'—';
- $('r-body').innerHTML=S.staff.map(s=>{const x=stats(s,f,t);Object.keys(T).forEach(k=>T[k]+=x[k]);return `<tr><td><b>${esc(s.name)}</b></td><td>${x.pres}</td><td>${x.abs}</td><td>${x.leave}</td><td>${z(x.work)}</td><td>${z(x.late)}</td><td>${z(x.early)}</td></tr>`}).join('')||'<tr><td colspan="7" class="mut" style="text-align:center;padding:22px">لا توجد فنيات.</td></tr>';
- $('r-foot').innerHTML=S.staff.length?`<tr><td>الإجمالي</td><td>${T.pres}</td><td>${T.abs}</td><td>${T.leave}</td><td>${z(T.work)}</td><td>${z(T.late)}</td><td>${z(T.early)}</td></tr>`:''}
+function rRep(){if(!$('r-from').value)return repMonth();const f=$('r-from').value,t=$('r-to').value,now=new Date();$('r-month').classList.toggle('p',f===tds(new Date(now.getFullYear(),now.getMonth(),1))&&t===tds(new Date(now.getFullYear(),now.getMonth()+1,0)));const z=m=>m?hm(m)+' س':'—';
+ $('r-body').innerHTML=S.staff.map(s=>{const x=stats(s,f,t);return `<tr><td><b>${esc(s.name)}</b></td><td>${x.pres}</td><td>${x.abs}</td><td>${x.leave}</td><td>${z(x.late)}</td><td>${z(x.early)}</td><td>${x.over?'<b style="color:var(--ok)">'+hm(x.over)+' س</b>':'—'}</td></tr>`}).join('')||'<tr><td colspan="7" class="mut" style="text-align:center;padding:22px">لا توجد فنيات.</td></tr>'}
 let adjSid=null;
 function openAdj(sid){adjSid=sid;$('ad-amt').value='';$('ad-note').value='';rAdj();$('m-adj').classList.add('on')}
 function rAdj(){const s=S.staff.find(x=>x.id===adjSid),ym=$('p-month').value;$('ma-t').textContent='بنود '+s.name+' — '+ym;
@@ -105,7 +104,7 @@ function labelRows(tb){const hs=[...tb.closest('table').querySelectorAll('thead 
 document.querySelectorAll('tbody,tfoot').forEach(tb=>new MutationObserver(()=>labelRows(tb)).observe(tb,{childList:true}));
 
 // ----- Version check: index.html and app.js must be uploaded together -----
-const VERSION='4';
+const VERSION='6';
 if($('ver'))$('ver').textContent='نسخة '+VERSION;
 if($('hv'))$('hv').textContent='v'+VERSION;
 if(document.body.dataset.v!==VERSION)toast('⚠️ index.html و app.js من نسختين مختلفتين — ارفعي كل الملفات معًا ثم حدّثي الصفحة',1);

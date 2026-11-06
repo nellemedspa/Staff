@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="robots" content="noindex,nofollow"><meta name="viewport" content="width=device-width,initial-scale=1"><title>نل — إدارة الفنيات</title><link rel="stylesheet" href="style.css"></head><body data-v="4">
+<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="robots" content="noindex,nofollow"><meta name="viewport" content="width=device-width,initial-scale=1"><title>نل — إدارة الفنيات</title><link rel="stylesheet" href="style.css"></head><body data-v="6">
 <div id="login"><form onsubmit="return login(event)"><h2>نل — إدارة الفنيات</h2><input id="lu" placeholder="اسم المستخدم" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false"><input id="lp" type="password" placeholder="كلمة المرور" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false"><div id="le" hidden>اسم المستخدم أو كلمة المرور غير صحيحة</div><button class="b p">دخول</button><small id="ver" class="mut" style="text-align:center"></small></form></div>
 <header><b>نل · إدارة الفنيات <small id="hv" style="opacity:.55;font-weight:400;font-size:10px"></small></b><nav id="tabs"><button data-t="staff" class="on adm">الفنيات</button><button data-t="att">الحضور</button><button data-t="pay" class="adm">المرتبات</button><button data-t="rep">التقرير</button></nav><span><button class="b" onclick="load()" title="تحديث">🔄</button><button class="b" onclick="logout()">خروج</button></span></header>
 <main>
@@ -9,7 +9,7 @@
 <section id="t-pay"><div class="bar"><h2>المرتبات</h2><input type="month" id="p-month" onchange="rPay()"></div>
 <div class="card"><table><thead><tr><th>الاسم</th><th>الأساسي</th><th>مبيعاتها</th><th>العمولة</th><th>غياب</th><th>تأخير / مبكر</th><th>بنود</th><th>الصافي</th><th></th></tr></thead><tbody id="p-body"></tbody><tfoot id="p-foot"></tfoot></table></div></section>
 <section id="t-rep"><div class="bar"><h2>تقرير الحضور</h2><input type="date" id="r-from" onchange="rRep()"><input type="date" id="r-to" onchange="rRep()"><button class="b" id="r-month" onclick="repMonth()">هذا الشهر</button></div>
-<div class="card"><table><thead><tr><th>الاسم</th><th>أيام الحضور</th><th>أيام الغياب</th><th>أيام الإجازة</th><th>ساعات العمل</th><th>التأخير</th><th>الخروج المبكر</th></tr></thead><tbody id="r-body"></tbody><tfoot id="r-foot"></tfoot></table></div></section>
+<div class="card"><table><thead><tr><th>الاسم</th><th>أيام الحضور</th><th>أيام الغياب</th><th>أيام الإجازة</th><th>التأخير</th><th>الخروج المبكر</th><th>الأوفر تايم</th></tr></thead><tbody id="r-body"></tbody></table></div></section>
 </main>
 <div class="md" id="m-staff"><div><h3 id="ms-t">فنية</h3><div class="f">
 <label>الاسم<input id="s-name"></label><label>التخصص<input id="s-spec"></label>
