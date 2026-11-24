@@ -19,7 +19,7 @@ function toast(m,bad){const t=$('toast');t.textContent=m;t.className='on'+(bad?'
 async function get(t){let all=[],o=0;for(;;){const r=await fetch(`${SB}/rest/v1/${t}?select=*&order=created_at.asc,id.asc&limit=1000&offset=${o}`,{headers:H});if(!r.ok)throw new Error(t+' '+r.status);const rows=await r.json();all=all.concat(rows);if(rows.length<1000)break;o+=1000}return all.map(r=>({...r.data,id:r.id}))}
 async function up(t,rec){try{const r=await fetch(`${SB}/rest/v1/${t}`,{method:'POST',headers:{...H,Prefer:'resolution=merge-duplicates'},body:JSON.stringify({id:rec.id,data:rec})});if(!r.ok)throw new Error(r.status+' '+(await r.text()).slice(0,70));return true}catch(e){console.error(e);toast('⚠️ لم يتم الحفظ: '+e.message,1);return false}}
 async function del(t,id){try{const r=await fetch(`${SB}/rest/v1/${t}?id=eq.${id}`,{method:'DELETE',headers:H});if(!r.ok)throw new Error(r.status);return true}catch(e){toast('⚠️ لم يتم الحذف: '+e.message,1);return false}}
-async function load(){try{const lim=ROLE==='limited';const[a,b,c,d,e]=await Promise.all([get('nelle_hr_staff'),get('nelle_hr_att'),lim?[]:get('nelle_hr_adj'),lim?[]:get('nelle_invoices'),lim?[]:get('nelle_techs')]);Object.assign(S,{staff:a,att:b,adj:c,inv:d,techs:e});render()}catch(e){toast('⚠️ تعذر التحميل: '+e.message+' — تأكدي من تشغيل setup.sql',1)}}
+async function load(){try{const lim=ROLE==='limited';const[a,b,c,d,e]=await Promise.all([get('nelle_hr_staff'),get('nelle_hr_att'),lim?[]:get('nelle_hr_adj'),[],lim?[]:get('nelle_techs')]);Object.assign(S,{staff:a,att:b,adj:c,inv:d,techs:e});render()}catch(e){toast('⚠️ تعذر التحميل: '+e.message+' — تأكدي من تشغيل setup.sql',1)}}
 // ----- Login (simple screen-lock) -----
 function start(role){ROLE=role;document.body.classList.toggle('limited',role==='limited');$('login').classList.remove('on');if(role==='limited'){document.querySelector('[data-t="att"]').click();$('a-date').max=tds(new Date())}load()}
 function login(ev){ev.preventDefault();const typed=$('lu').value.trim().toLowerCase(),user=Object.keys(USERS).find(k=>k.toLowerCase()===typed),u=USERS[user];if(u&&$('lp').value.trim()===u.pass){localStorage.setItem('hr_auth',JSON.stringify({user,role:u.role}));start(u.role)}else{$('le').hidden=false;$('lp').value=''}return false}
@@ -80,7 +80,11 @@ function pay(s,ym){const dim=new Date(+ym.slice(0,4),+ym.slice(5),0).getDate(),m
  const nm=techName(s),rev=S.inv.filter(i=>i.tn===nm&&(i.date||'').startsWith(ym)).reduce((x,i)=>x+(+i.tot||0),0),com=rev*(+s.pct||0)/100;
  const ad=S.adj.filter(a=>a.staffId===s.id&&a.month===ym),bon=ad.filter(a=>a.type==='b').reduce((x,a)=>x+a.amt,0),ded=ad.filter(a=>a.type==='d').reduce((x,a)=>x+a.amt,0);
  return{fac,part,daily,base,rev,com,...st,absD,lateD,bon,ded,net:base+com+bon-absD-lateD-ded}}
-function rPay(){if(!$('p-month').value)$('p-month').value=tds(new Date()).slice(0,7);const ym=$('p-month').value;let T=0;const n=x=>x.toFixed(2);
+const INVM={};
+async function getInv(ym){const[y,m]=ym.split('-').map(Number),nx=m==12?`${y+1}-01`:`${y}-${String(m+1).padStart(2,'0')}`;const r=await fetch(`${SB}/rest/v1/nelle_invoices?select=tn:data->>tn,date:data->>date,tot:data->>tot&data->>date=gte.${ym}-01&data->>date=lt.${nx}-01&limit=1000`,{headers:H});if(!r.ok)throw new Error('invoices '+r.status);return r.json()}
+function rPay(){if(!$('p-month').value)$('p-month').value=tds(new Date()).slice(0,7);const ym=$('p-month').value;
+ if(ROLE!=='limited'){if(!INVM[ym]){INVM[ym]=[];getInv(ym).then(d=>{INVM[ym]=d;if($('p-month').value===ym)rPay()}).catch(e=>{delete INVM[ym];toast('⚠️ تعذر تحميل الفواتير: '+e.message,1)})}S.inv=INVM[ym]}
+ let T=0;const n=x=>x.toFixed(2);
  const rows=S.staff.map(s=>({s,p:pay(s,ym)})).filter(r=>r.p.fac>0);
  $('p-body').innerHTML=rows.map(({s,p})=>{T+=p.net;const lt=p.late+p.early;return `<tr><td><b>${esc(s.name)}</b></td><td>${n(p.base)}${p.part?`<div class="mut">${p.pres} يوم × ${n(p.daily)}</div>`:p.fac<1?'<div class="mut">شهر جزئي</div>':''}</td><td>${n(p.rev)}</td><td>${n(p.com)}<div class="mut"><input type="number" min="0" step="0.5" value="${s.pct||0}" style="width:62px;min-width:0" onchange="setPct('${s.id}',this.value)"> %</div></td><td>${p.abs?p.abs+' يوم'+(p.absD?' (−'+n(p.absD)+')':''):'—'}</td><td>${lt?hm(lt)+' س'+(p.lateD?' (−'+n(p.lateD)+')':''):'—'}</td><td>${p.bon||p.ded?'+'+n(p.bon)+' / −'+n(p.ded):'—'}</td><td class="net">${n(p.net)}</td><td><button class="b" onclick="openAdj('${s.id}')">بنود</button></td></tr>`}).join('')||'<tr><td colspan="9" class="mut" style="text-align:center;padding:22px">لا توجد فنيات في هذا الشهر.</td></tr>';
  $('p-foot').innerHTML=rows.length?`<tr><td colspan="7">إجمالي المرتبات</td><td class="net">${n(T)}</td><td></td></tr>`:''}
@@ -104,7 +108,7 @@ function labelRows(tb){const hs=[...tb.closest('table').querySelectorAll('thead 
 document.querySelectorAll('tbody,tfoot').forEach(tb=>new MutationObserver(()=>labelRows(tb)).observe(tb,{childList:true}));
 
 // ----- Version check: index.html and app.js must be uploaded together -----
-const VERSION='6';
+const VERSION='7';
 if($('ver'))$('ver').textContent='نسخة '+VERSION;
 if($('hv'))$('hv').textContent='v'+VERSION;
 if(document.body.dataset.v!==VERSION)toast('⚠️ index.html و app.js من نسختين مختلفتين — ارفعي كل الملفات معًا ثم حدّثي الصفحة',1);
